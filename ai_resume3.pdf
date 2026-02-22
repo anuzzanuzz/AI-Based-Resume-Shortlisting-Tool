@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | AI Resume Shortlisting Tool</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-container {
+      background: var(--card-background);
+      backdrop-filter: blur(15px);
+      padding: 40px 50px;
+      border-radius: var(--border-radius-lg);
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      width: 400px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 30px;
+      font-size: 2rem;
+    }
+    input {
+      margin: 15px 0;
+      background: rgba(255, 255, 255, 0.9);
+    }
+    .error-message {
+      color: #ef4444;
+      margin-top: 15px;
+      padding: 10px;
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .success-message {
+      color: var(--secondary-color);
+      margin-top: 15px;
+      padding: 10px;
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    .login-btn {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      margin-top: 20px;
+    }
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(56, 189, 248, 0.4);
+    }
+    .login-btn:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1>AI Resume Tool</h1>
+    <form method="POST">
+      <input type="text" name="username" placeholder="Username" required><br>
+      <input type="password" name="password" placeholder="Password" required><br>
+      <button type="submit" class="login-btn">
+        <i class="fas fa-sign-in-alt"></i>
+        Login
+      </button>
+    </form>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="success-message">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {% if error %}
+      <div class="error-message">{{ error }}</div>
+    {% endif %}
+  </div>
+</body>
+</html>

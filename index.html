@@ -1,0 +1,220 @@
+/* Global Theme Variables */
+:root {
+  --primary-color: #38bdf8;
+  --primary-dark: #0ea5e9;
+  --secondary-color: #10b981;
+  --secondary-dark: #059669;
+  --background-gradient: linear-gradient(135deg, #1e293b, #0f172a);
+  --card-background: rgba(255, 255, 255, 0.95);
+  --glass-background: rgba(255, 255, 255, 0.05);
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-light: #e2e8f0;
+  --border-color: #e5e7eb;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --transition: all 0.3s ease;
+}
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: var(--background-gradient);
+  color: #000000;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Header Styles */
+header {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(14, 165, 233, 0.1));
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
+
+header h1 {
+  font-size: 1.6rem;
+  color: var(--primary-color);
+  letter-spacing: 1px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Navigation */
+nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+nav a, .notification-icon {
+  text-decoration: none;
+  color: var(--text-light);
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  transition: var(--transition);
+  background: var(--glass-background);
+  border: 1px solid transparent;
+}
+
+nav a:hover, .notification-icon:hover {
+  color: var(--primary-color);
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Container */
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+/* Cards */
+.card {
+  background: var(--card-background);
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius-lg);
+  padding: 30px;
+  margin: 20px 0;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+  color: #000000;
+}
+
+/* Buttons */
+.btn {
+  background: var(--primary-color);
+  color: white;
+  padding: 12px 28px;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: var(--transition);
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(56, 189, 248, 0.3);
+}
+
+.btn-secondary {
+  background: var(--secondary-color);
+}
+
+.btn-secondary:hover {
+  background: var(--secondary-dark);
+  box-shadow: 0 8px 15px rgba(16, 185, 129, 0.3);
+}
+
+/* Forms */
+input, textarea, select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: var(--transition);
+  background: white;
+  color: var(--text-primary);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+}
+
+/* Tables */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.table th, .table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  color: #000000;
+}
+
+.table th {
+  background: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+.table tr:hover {
+  background: rgba(56, 189, 248, 0.05);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease;
+}
+
+.fade-in-down {
+  animation: fadeInDown 0.6s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+    padding: 10px;
+  }
+  
+  header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .card {
+    padding: 20px;
+  }
+}

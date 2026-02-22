@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Second Round Assessment - AI Resume Shortlisting</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <style>
+        .quiz-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: var(--border-radius-lg);
+            margin-bottom: 30px;
+        }
+        .assessment-container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .section {
+            background: var(--card-background);
+            border-radius: var(--border-radius-lg);
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .section-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+        .question-card {
+            background: #f9fafb;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .question-number {
+            background: var(--primary-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 20px;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            margin: 8px 0;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            color: #000000;
+        }
+        .option-label:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--primary-color);
+        }
+        .option-label input[type="radio"] {
+            display: none;
+        }
+        .custom-radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 12px;
+            position: relative;
+            background: white;
+            transition: var(--transition);
+        }
+        .custom-radio::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: var(--transition);
+        }
+        .option-label input[type="radio"]:checked + .custom-radio::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .coding-question {
+            background: #f8fafc;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .code-input {
+            width: 100%;
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: #000000;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            resize: vertical;
+        }
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-background);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            border: 2px solid var(--primary-color);
+            z-index: 1000;
+        }
+        .timer-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .submit-btn {
+            background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark));
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(16, 185, 129, 0.3);
+        }
+        .submit-section {
+            text-align: center;
+            margin: 40px 0;
+            padding: 30px;
+            background: var(--card-background);
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-robot"></i> AI Resume Shortlisting Tool</h1>
+        <nav>
+            <span style="color: var(--text-secondary);">Second Round Assessment</span>
+        </nav>
+    </header>
+
+    <div class="timer">
+        <div class="timer-text" id="timer">90:00</div>
+        <div style="font-size: 0.8rem; color: var(--text-secondary);">Time Remaining</div>
+    </div>
+
+    <div class="assessment-container">
+        <div class="quiz-header">
+            <h1>🎯 Second Round Assessment</h1>
+            <p>Candidate: <strong>{{ candidate.name }}</strong></p>
+            <p>Complete all sections within 30 minutes</p>
+        </div>
+
+        <!-- Reasoning Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div>
+                    <h3 style="margin: 0; color: var(--text-primary);">Logical Reasoning</h3>
+                    <p style="margin: 5px 0 0 0; color: var(--text-secondary);">{{ challenges.reasoning|length }} questions</p>
+                </div>
+            </div>
+            
+            {% for question in challenges.reasoning %}
+            <div class="question-card">
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <span class="question-number">{{ loop.index }}</span>
+                    <div class="question-text">{{ question.question }}</div>
+                </div>
+                {% for option in question.options %}
+                <label class="option-label">
+                    <input type="radio" name="reasoning_{{ loop.index0 }}" value="{{ option }}" data-correct="{{ question.correct_answer }}">
+                    <span class="custom-radio"></span>{{ option }}
+                </label>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Aptitude Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <div>
+                    <h3 style="margin: 0; color: var(--text-primary);">Mathematical Aptitude</h3>
+                    <p style="margin: 5px 0 0 0; color: var(--text-secondary);">{{ challenges.aptitude|length }} questions</p>
+                </div>
+            </div>
+            
+            {% for question in challenges.aptitude %}
+            <div class="question-card">
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <span class="question-number">{{ loop.index }}</span>
+                    <div class="question-text">{{ question.question }}</div>
+                </div>
+                {% for option in question.options %}
+                <label class="option-label">
+                    <input type="radio" name="aptitude_{{ loop.index0 }}" value="{{ option }}" data-correct="{{ question.correct_answer }}">
+                    <span class="custom-radio"></span>{{ option }}
+                </label>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Coding Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <div>
+                    <h3 style="margin: 0; color: var(--text-primary);">Programming Challenges</h3>
+                    <p style="margin: 5px 0 0 0; color: var(--text-secondary);">{{ challenges.coding|length }} coding problems</p>
+                </div>
+            </div>
+            
+            {% for question in challenges.coding %}
+            <div class="coding-question">
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <span class="question-number">{{ loop.index }}</span>
+                    <div class="question-text">{{ question.question }}</div>
+                </div>
+                <div style="margin: 15px 0; padding: 15px; background: rgba(56, 189, 248, 0.1); border-radius: var(--border-radius); color: #000000;">
+                    <strong>Sample Input:</strong> {{ question.sample_input }}<br>
+                    <strong>Expected Output:</strong> {{ question.expected_output }}<br>
+                    <strong>Difficulty:</strong> <span style="color: var(--primary-color);">{{ question.difficulty.title() }}</span>
+                </div>
+                <textarea class="code-input" name="coding_{{ loop.index0 }}" placeholder="Write your solution here..."></textarea>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="submit-section">
+            <h3 style="color: var(--primary-color); margin-bottom: 15px;">Ready to Submit?</h3>
+            <p style="color: #000000; margin-bottom: 25px;">Make sure you've answered all questions before submitting.</p>
+            <button onclick="submitAssessment()" class="submit-btn">
+                <i class="fas fa-paper-plane"></i> Submit Assessment
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let timeLeft = 30 * 60; // 30 minutes in seconds
+        
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                alert('Time is up! Submitting your assessment...');
+                submitAssessment();
+                return;
+            }
+            
+            timeLeft--;
+        }
+        
+        // Update timer every second
+        setInterval(updateTimer, 1000);
+        
+        function submitAssessment() {
+            const answers = {
+                reasoning: [],
+                aptitude: [],
+                coding: []
+            };
+            
+            console.log('🚀 Starting assessment submission...');
+            
+            // Collect reasoning answers - include ALL questions
+            {% for question in challenges.reasoning %}
+            const reasoning{{ loop.index0 }} = document.querySelector('input[name="reasoning_{{ loop.index0 }}"]:checked');
+            const reasoningCorrect{{ loop.index0 }} = document.querySelector('input[name="reasoning_{{ loop.index0 }}"]');
+            const correctAnswer{{ loop.index0 }} = reasoningCorrect{{ loop.index0 }} ? reasoningCorrect{{ loop.index0 }}.dataset.correct : '{{ question.correct_answer }}';
+            
+            answers.reasoning.push({
+                question: "{{ question.question }}",
+                answer: reasoning{{ loop.index0 }} ? reasoning{{ loop.index0 }}.value : null,
+                correct: reasoning{{ loop.index0 }} ? (reasoning{{ loop.index0 }}.value === correctAnswer{{ loop.index0 }}) : false,
+                questionIndex: {{ loop.index0 }}
+            });
+            console.log('✓ Reasoning Q{{ loop.index0 }}: ' + (reasoning{{ loop.index0 }} ? reasoning{{ loop.index0 }}.value : 'UNANSWERED'));
+            {% endfor %}
+            
+            // Collect aptitude answers - include ALL questions
+            {% for question in challenges.aptitude %}
+            const aptitude{{ loop.index0 }} = document.querySelector('input[name="aptitude_{{ loop.index0 }}"]:checked');
+            const aptitudeCorrect{{ loop.index0 }} = document.querySelector('input[name="aptitude_{{ loop.index0 }}"]');
+            const aptCorrectAnswer{{ loop.index0 }} = aptitudeCorrect{{ loop.index0 }} ? aptitudeCorrect{{ loop.index0 }}.dataset.correct : '{{ question.correct_answer }}';
+            
+            answers.aptitude.push({
+                question: "{{ question.question }}",
+                answer: aptitude{{ loop.index0 }} ? aptitude{{ loop.index0 }}.value : null,
+                correct: aptitude{{ loop.index0 }} ? (aptitude{{ loop.index0 }}.value === aptCorrectAnswer{{ loop.index0 }}) : false,
+                questionIndex: {{ loop.index0 }}
+            });
+            console.log('✓ Aptitude Q{{ loop.index0 }}: ' + (aptitude{{ loop.index0 }} ? aptitude{{ loop.index0 }}.value : 'UNANSWERED'));
+            {% endfor %}
+            
+            // Collect coding answers - include ALL questions
+            {% for question in challenges.coding %}
+            const coding{{ loop.index0 }} = document.querySelector('textarea[name="coding_{{ loop.index0 }}"]');
+            
+            answers.coding.push({
+                question: "{{ question.question }}",
+                answer: coding{{ loop.index0 }} ? coding{{ loop.index0 }}.value.trim() : '',
+                sample_input: "{{ question.sample_input }}",
+                expected_output: "{{ question.expected_output }}",
+                questionIndex: {{ loop.index0 }}
+            });
+            console.log('✓ Coding Q{{ loop.index0 }}: ' + (coding{{ loop.index0 }} && coding{{ loop.index0 }}.value.trim() ? 'ANSWERED' : 'EMPTY'));
+            {% endfor %}
+            
+            console.log('📊 Total answers collected:', answers);
+            console.log('Reasoning:', answers.reasoning.length, 'Aptitude:', answers.aptitude.length, 'Coding:', answers.coding.length);
+            
+            // Submit answers
+            fetch('/api/submit-second-round', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    candidate_id: '{{ candidate_id }}',
+                    answers: answers
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('📨 Server response:', data);
+                if (data.success) {
+                    alert('✓ Assessment submitted successfully!');
+                    window.location.href = '/second-round-result/' + '{{ candidate_id }}';
+                } else {
+                    alert('Error submitting assessment: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error:', error);
+                alert('Failed to submit assessment: ' + error.message);
+            });
+        }
+        
+        // Prevent page refresh/close without warning
+        window.addEventListener('beforeunload', function(e) {
+            e.preventDefault();
+            e.returnValue = '';
+        });
+    </script>
+</body>
+</html>

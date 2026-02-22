@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Results | AI Resume Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <style>
+        .chart-container {
+            background: var(--card-background);
+            padding: 20px;
+            border-radius: var(--border-radius-lg);
+            margin: 20px 0;
+            box-shadow: var(--shadow);
+        }
+        .chart-container img {
+            width: 100%;
+            max-width: 900px;
+            border-radius: var(--border-radius);
+        }
+        .results-table {
+            background: var(--card-background);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: var(--shadow);
+        }
+        .results-table table {
+            background: transparent;
+            box-shadow: none;
+        }
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+        input[type="text"], input[type="email"] {
+            width: 200px;
+            padding: 8px;
+            margin: 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        input[type="text"]:focus, input[type="email"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+        }
+        .action-btn {
+            background: var(--secondary-color);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        .action-btn:hover {
+            background: var(--secondary-dark);
+            transform: translateY(-1px);
+        }
+        .finalize-btn {
+            background: #f59e0b;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16px;
+            margin: 10px;
+            transition: var(--transition);
+        }
+        .finalize-btn:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+        .send-bulk-btn {
+            background: #8b5cf6;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16px;
+            margin: 10px;
+            transition: var(--transition);
+        }
+        .send-bulk-btn:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+        }
+        .selected-count {
+            color: var(--secondary-color);
+            font-size: 18px;
+            font-weight: 700;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .match-percentage {
+            color: var(--secondary-color);
+            font-weight: 700;
+        }
+        .notification-wrapper { position: relative; }
+        .notification-icon { position: relative; cursor: pointer; padding: 8px 12px; color: #e2e8f0; font-size: 1.2rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid transparent; transition: all 0.3s ease; }
+        .notification-icon:hover { color: #38bdf8; background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.3); transform: translateY(-1px); }
+        .notification-count { position: absolute; top: -2px; right: -2px; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; font-weight: 600; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4); animation: pulse 2s infinite; }
+        .notification-count.show { display: flex; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .notification-dropdown { position: absolute; top: calc(100% + 10px); right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); color: #1f2937; width: 320px; max-height: 400px; overflow-y: auto; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); border: 1px solid rgba(56, 189, 248, 0.2); display: none; z-index: 1000; }
+        .notification-item { padding: 15px; border-bottom: 1px solid rgba(0, 0, 0, 0.1); cursor: pointer; transition: all 0.3s ease; }
+        .notification-item:hover { background: rgba(56, 189, 248, 0.1); }
+        .notification-item.unseen { background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(14, 165, 233, 0.05)); border-left: 4px solid #38bdf8; font-weight: 600; }
+        .notification-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-robot"></i> AI Resume Shortlisting Tool</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Dashboard</a>
+            <a href="{{ url_for('top_3_results') }}">Top Results</a>
+            <div class="notification-wrapper">
+                <div class="notification-icon" onclick="toggleNotifications()">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-count" id="notificationCount">0</span>
+                </div>
+                <div class="notification-dropdown" id="notificationDropdown"></div>
+            </div>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
+    </header>
+    <div class="container">
+        <h1 class="fade-in-down">📊 Resume Shortlisting Results</h1>
+        <div class="chart-container fade-in-up">
+            <img src="/static/{{ chart }}" alt="Results Chart">
+        </div>
+        
+        <div class="results-table fade-in-up">
+            <h2 style="padding: 20px; margin: 0; color: var(--text-primary);">All Candidates</h2>
+            <table class="table">
+            <tr>
+                <th>Select</th>
+                <th>Resume</th>
+                <th>Match %</th>
+                <th>Email</th>
+                <th>Action</th>
+            </tr>
+            {% for row in tables %}
+            <tr>
+                <td><input type="checkbox" class="candidate-select" data-filename="{{ row[0] }}" data-match="{{ row[1] }}"></td>
+                <td>{{ row[0] }}</td>
+                <td><span class="match-percentage">{{ row[1] }}%</span></td>
+                <td><input type="email" class="candidate-email" placeholder="email@example.com"></td>
+                <td>
+                    <button class="action-btn" onclick="sendSingleEmail(this)">📧 Send</button>
+                </td>
+            </tr>
+            {% endfor %}
+            </table>
+        </div>
+        
+        <div class="selected-count">Selected: <span id="selected-count">0</span> candidates</div>
+        
+        <div style="margin-top: 20px;">
+            <button class="finalize-btn" onclick="finalizeTop5()">✓ Finalize Top 5</button>
+            <button class="send-bulk-btn" onclick="sendBulkEmails()">📧 Send to Selected</button>
+        </div>
+    </div>
+
+    <script>
+    // Update selected count
+    document.querySelectorAll('.candidate-select').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            const count = document.querySelectorAll('.candidate-select:checked').length;
+            document.getElementById('selected-count').textContent = count;
+        });
+    });
+    
+    function finalizeTop5() {
+        const checkboxes = document.querySelectorAll('.candidate-select');
+        checkboxes.forEach((cb, index) => {
+            cb.checked = index < 5;
+        });
+        const count = document.querySelectorAll('.candidate-select:checked').length;
+        document.getElementById('selected-count').textContent = count;
+        alert('✓ Top 5 candidates selected!');
+    }
+    
+    function extractNameFromFilename(filename) {
+        // Remove file extension
+        let name = filename.split('.')[0];
+        // Replace underscores and dashes with spaces
+        name = name.replace(/[_-]/g, ' ');
+        // Capitalize first letter of each word
+        name = name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+        return name;
+    }
+    
+    function sendSingleEmail(btn) {
+        const row = btn.closest('tr');
+        const filename = row.querySelector('.candidate-select').dataset.filename;
+        const match = row.querySelector('.candidate-select').dataset.match;
+        const email = row.querySelector('.candidate-email').value;
+        
+        // Auto-generate candidate name from filename
+        const name = extractNameFromFilename(filename);
+        
+        if (!email || !email.includes('@')) {
+            alert('Please enter a valid email address');
+            return;
+        }
+        
+        fetch('/send-email', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({candidates: [{name: name, filename: filename, email: email, match: match}]})
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert('✓ Email sent to ' + email);
+                btn.style.background = '#059669';
+                btn.textContent = '✓ Sent';
+            } else {
+                alert('Error: ' + data.message);
+            }
+        });
+    }
+    
+    function sendBulkEmails() {
+        const selected = [];
+        document.querySelectorAll('.candidate-select:checked').forEach(checkbox => {
+            const row = checkbox.closest('tr');
+            const filename = checkbox.dataset.filename;
+            const email = row.querySelector('.candidate-email').value;
+            if (email && email.includes('@')) {
+                const name = extractNameFromFilename(filename);
+                selected.push({
+                    name: name,
+                    filename: filename,
+                    match: checkbox.dataset.match,
+                    email: email
+                });
+            }
+        });
+        
+        if (selected.length === 0) {
+            alert('Please select candidates and enter their emails');
+            return;
+        }
+        
+        fetch('/send-skill-test-emails', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({candidates: selected})
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+            } else {
+                alert('Error: ' + data.message);
+            }
+        });
+    }
+    function toggleNotifications() {
+        const dropdown = document.getElementById('notificationDropdown');
+        if (dropdown.style.display === 'block') { dropdown.style.display = 'none'; } else { loadNotifications(); dropdown.style.display = 'block'; }
+    }
+    function loadNotifications() {
+        fetch('/api/notifications').then(response => response.json()).then(data => {
+            const count = document.getElementById('notificationCount');
+            count.textContent = data.unseen_count || 0;
+            count.classList.toggle('show', data.unseen_count > 0);
+        }).catch(error => console.error('Error:', error));
+    }
+    document.addEventListener('DOMContentLoaded', function() { loadNotifications(); setInterval(loadNotifications, 30000); });
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('notificationDropdown');
+        const icon = document.querySelector('.notification-icon');
+        if (dropdown && !dropdown.contains(event.target) && !icon.contains(event.target)) { dropdown.style.display = 'none'; }
+    });
+    </script>
+</body>
+</html>

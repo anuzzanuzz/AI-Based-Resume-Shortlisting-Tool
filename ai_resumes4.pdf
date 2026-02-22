@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Test - AI Resume Shortlisting</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <style>
+        .quiz-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: var(--border-radius-lg);
+            margin-bottom: 30px;
+        }
+        .quiz-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .job-desc {
+            background: rgba(56, 189, 248, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: var(--border-radius);
+            color: var(--text-light);
+        }
+        .question-card {
+            background: var(--card-background);
+            border-radius: var(--border-radius-lg);
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        .question-number {
+            background: var(--primary-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            margin: 8px 0;
+            background: #f9fafb;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-primary);
+        }
+        .option-label:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--primary-color);
+        }
+        .option-label input[type="radio"] {
+            display: none;
+        }
+        .custom-radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 12px;
+            position: relative;
+            background: white;
+            transition: var(--transition);
+        }
+        .custom-radio::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: var(--transition);
+        }
+        .option-label input[type="radio"]:checked + .custom-radio::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .option-label:hover .custom-radio {
+            border-color: var(--primary-color);
+        }
+        .submit-btn {
+            background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark));
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            margin: 30px 0;
+            transition: var(--transition);
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(16, 185, 129, 0.3);
+        }
+        .result-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--secondary-color);
+            color: var(--secondary-dark);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1>🎯 Skill Assessment Test</h1>
+            <p>Candidate: <strong>{{ candidate_name }}</strong></p>
+        </div>
+        
+        <div class="job-desc">
+            <h3>📋 Job Description</h3>
+            <p>{{ job_description }}</p>
+        </div>
+        
+        <form id="skill-test-form">
+            <div id="questions-container"></div>
+            <button type="submit" class="submit-btn">📝 Submit Test</button>
+        </form>
+        
+        <div id="result-message"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/get-test-questions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ job_description: '{{ job_description }}' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                questionsData = data.questions;
+                const questionsContainer = document.getElementById('questions-container');
+                data.questions.forEach((question, index) => {
+                    if (question.question && question.options && question.options.length === 4) {
+                        const questionDiv = document.createElement('div');
+                        questionDiv.classList.add('question-card');
+                        questionDiv.innerHTML = `
+                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                                <span class="question-number">${index + 1}</span>
+                                <div class="question-text">${question.question}</div>
+                            </div>
+                            <label class="option-label"><input type="radio" name="answer${index}" value="${question.options[0] || ''}"><span class="custom-radio"></span>${question.options[0] || 'Option not available'}</label>
+                            <label class="option-label"><input type="radio" name="answer${index}" value="${question.options[1] || ''}"><span class="custom-radio"></span>${question.options[1] || 'Option not available'}</label>
+                            <label class="option-label"><input type="radio" name="answer${index}" value="${question.options[2] || ''}"><span class="custom-radio"></span>${question.options[2] || 'Option not available'}</label>
+                            <label class="option-label"><input type="radio" name="answer${index}" value="${question.options[3] || ''}"><span class="custom-radio"></span>${question.options[3] || 'Option not available'}</label>
+                        `;
+                        questionsContainer.appendChild(questionDiv);
+                    }
+                });
+            });
+        });
+
+        let questionsData = [];
+        
+        document.getElementById('skill-test-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const answers = [];
+            const questions = document.querySelectorAll('.question-card');
+            questions.forEach((question, index) => {
+                const selectedAnswer = question.querySelector(`input[name="answer${index}"]:checked`);
+                const questionText = question.querySelector('.question-text').innerText;
+                answers.push({
+                    question: questionText,
+                    answer: selectedAnswer ? selectedAnswer.value : null,
+                    correct: questionsData[index] ? questionsData[index].correct_answer : ''
+                });
+            });
+
+            fetch('/api/submit-test-answers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    candidate_name: '{{ candidate_name }}',
+                    candidate_email: '{{ candidate_email }}',
+                    job_description: '{{ job_description }}',
+                    answers: answers
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result-message');
+                resultDiv.className = 'result-message';
+                resultDiv.innerHTML = `🎉 <strong>Test Completed!</strong><br>Your Score: ${data.score} out of ${data.total} points`;
+                document.getElementById('skill-test-form').style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

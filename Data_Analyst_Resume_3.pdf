@@ -1,0 +1,91 @@
+from flask import Flask, session
+import pytest
+import json
+
+# Assuming app.py is the main application file
+from app import app
+
+@pytest.fixture
+def client():
+    app.config['TESTING'] = True
+    with app.test_client() as client:
+        yield client
+
+def test_home_page(client):
+    """Test the home page response."""
+    response = client.get('/')
+    assert response.status_code == 200
+    assert b'Welcome to AI Resume Shortlisting' in response.data
+
+def test_login_page(client):
+    """Test the login page response."""
+    response = client.get('/login')
+    assert response.status_code == 200
+    assert b'Login' in response.data
+
+def test_upload_page(client):
+    """Test the upload page response."""
+    response = client.get('/upload')
+    assert response.status_code == 302  # Redirects to login if not authenticated
+
+    with client.session_transaction() as sess:
+        sess['user'] = 'test_user'  # Simulate a logged-in user
+
+    response = client.get('/upload')
+    assert response.status_code == 200
+
+def test_about_page(client):
+    """Test the about page response."""
+    response = client.get('/about')
+    assert response.status_code == 200
+    assert b'About AI Resume Shortlisting' in response.data
+
+def test_login_functionality(client):
+    """Test the login functionality."""
+    response = client.post('/login', data={'username': 'resume.project25', 'password': 'project25resume'})
+    assert response.status_code == 302  # Redirects after successful login
+    assert b'Welcome resume.project25!' in response.data
+
+def test_invalid_login(client):
+    """Test invalid login credentials."""
+    response = client.post('/login', data={'username': 'wrong_user', 'password': 'wrong_pass'})
+    assert response.status_code == 200
+    assert b'Invalid credentials!' in response.data
+
+def test_logout(client):
+    """Test the logout functionality."""
+    with client.session_transaction() as sess:
+        sess['user'] = 'test_user'  # Simulate a logged-in user
+
+    response = client.get('/logout')
+    assert response.status_code == 302  # Redirects after logout
+    with client.session_transaction() as sess:
+        assert 'user' not in sess  # User should be logged out
+
+def test_api_get_test_questions(client):
+    """Test the API for getting test questions."""
+    job_description = "Software Engineer with experience in Python and Flask."
+    response = client.post('/api/get-test-questions', json={'job_description': job_description})
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert isinstance(data['questions'], list)  # Ensure the response is a list of questions
+
+def test_api_submit_test_answers(client):
+    """Test the API for submitting test answers."""
+    answers = [
+        {
+            'question': 'What is Flask?',
+            'answer': 'A web framework for Python.',
+            'correct': 'A web framework for Python.'
+        }
+    ]
+    response = client.post('/api/submit-test-answers', json={
+        'candidate_name': 'John Doe',
+        'candidate_email': 'john@example.com',
+        'job_description': 'Software Engineer',
+        'answers': answers
+    })
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert data['success'] is True
+    assert data['score'] >= 0  # Ensure score is a non-negative value

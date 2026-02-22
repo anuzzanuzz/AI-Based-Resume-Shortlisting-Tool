@@ -1,0 +1,86 @@
+from flask_mail import Mail, Message
+from flask import current_app
+
+mail = Mail()
+
+def send_email(subject, recipient, html_content, body=None):
+    msg = Message(subject=subject, recipients=[recipient], html=html_content)
+    if body:
+        msg.body = body
+    else:
+        # Fallback: strip HTML tags for plain text
+        import re
+        msg.body = re.sub(r'<[^>]+>', '', html_content).strip()
+    with current_app.app_context():
+        mail.send(msg)
+
+def send_skill_test_email(candidate_name, candidate_email, match_percentage):
+    subject = '🎯 Skill Test - AI Resume Shortlisting Platform'
+    html_content = f"""
+    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <h2 style="color: #38bdf8;">Hello {candidate_name},</h2>
+        <p>Congratulations! Your resume matched <strong>{match_percentage}%</strong> with the job description!</p>
+        
+        <p>You are now invited to take a <strong>Technical Skill Test</strong> to proceed to the next round.</p>
+        
+        <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <p><strong>📋 Test Details:</strong></p>
+            <ul>
+                <li>10 Technical Questions</li>
+                <li>Multiple Choice Format</li>
+                <li>Camera Permission Required</li>
+                <li>Duration: ~15 minutes</li>
+                <li>Each correct answer: 10 points</li>
+            </ul>
+        </div>
+        
+        <p style="margin-top: 20px;">
+            <a href="http://localhost:5000/skill-test/{candidate_name.replace(' ', '_')}" 
+               style="background: #38bdf8; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                ▶ Start Skill Test
+            </a>
+        </p>
+        
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+        <p style="color: #666; font-size: 12px;">
+            Best regards,<br>
+            <strong>AI Resume Shortlisting Team</strong>
+        </p>
+    </div>
+    """
+    send_email(subject, candidate_email, html_content)
+
+def send_hr_round_email(candidate_name, candidate_email, match_percent, test_score):
+    subject = '🎉 Congratulations! You are Selected for HR Round'
+    html_content = f"""
+    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <h2 style="color: #10b981;">Hello {candidate_name},</h2>
+        <p>Excellent news! You have been selected for the <strong>HR Round Interview</strong>!</p>
+        
+        <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #38bdf8;">
+            <p><strong>Your Performance:</strong></p>
+            <ul>
+                <li>Resume Match: {match_percent}%</li>
+                <li>Skill Test Score: {test_score}/100</li>
+            </ul>
+        </div>
+        
+        <p>Our HR team will contact you soon to schedule the HR interview.</p>
+        
+        <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <p><strong>📋 Next Steps:</strong></p>
+            <ul>
+                <li>Wait for HR team contact</li>
+                <li>Prepare for behavioral questions</li>
+                <li>Check your email regularly</li>
+            </ul>
+        </div>
+        
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+        <p style="color: #666; font-size: 12px;">
+            Best regards,<br>
+            <strong>AI Resume Shortlisting Team</strong>
+        </p>
+    </div>
+    """
+    send_email(subject, candidate_email, html_content)
